@@ -1,5 +1,5 @@
 module.exports.config = {
-	deviceName: 'xd-home-energy-monitor-2',
+	deviceName: 'ESP32',
 	
 	dynamoDb: {
 		table: process.env.DYNAMO_DB_TABLE,

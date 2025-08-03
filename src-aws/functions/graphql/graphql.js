@@ -1,6 +1,8 @@
 const { graphql, buildSchema } = require('graphql');
 const { usageData } = require('./resolvers/usageData'); // ตัวอย่าง
 // import resolver ตัวอื่น ๆ เช่นเดียวกัน
+const { realtime } = require('./resolvers/realtime');
+const { stats } = require('./resolvers/stats');
 
 const schema = buildSchema(`
   type Query {
@@ -27,6 +29,8 @@ const schema = buildSchema(`
 const resolvers = {
   usageData,
   // เพิ่ม resolver ตัวอื่น ๆ ที่ประกาศ
+  realtime,
+  stats,
 };
 
 module.exports.handler = async (event) => {

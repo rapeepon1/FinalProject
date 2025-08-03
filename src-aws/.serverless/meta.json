@@ -1,7 +1,7 @@
 {
-  "C:\\Users\\LENOVO\\Desktop\\Energy_Mornitor\\src-aws\\serverless.yml": {
+  "C:\\Users\\setar\\FinalProject\\src-aws\\serverless.yml": {
     "versionFramework": "4.17.2",
-    "servicePath": "C:\\Users\\LENOVO\\Desktop\\Energy_Mornitor\\src-aws\\serverless.yml",
+    "servicePath": "C:\\Users\\setar\\FinalProject\\src-aws\\serverless.yml",
     "serviceConfigFileName": "serverless.yml",
     "service": {
       "service": "smart-home-energy-monitor",
@@ -217,7 +217,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
-                  "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/dailyDataArchive.zip"
+                  "S3Key": "serverless/smart-home-energy-monitor/prod/1754232156649-2025-08-03T14:42:36.649Z/dailyDataArchive.zip"
                 },
                 "Handler": "functions/cron-rotate-daily.handler",
                 "Runtime": "nodejs18.x",
@@ -252,7 +252,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
-                  "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/graphql.zip"
+                  "S3Key": "serverless/smart-home-energy-monitor/prod/1754232156649-2025-08-03T14:42:36.649Z/graphql.zip"
                 },
                 "Handler": "functions/graphql/graphql.handler",
                 "Runtime": "nodejs18.x",
@@ -282,25 +282,25 @@
                 "GraphqlLogGroup"
               ]
             },
-            "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI": {
+            "DailyDataArchiveLambdaVersionLG17xB53ssZjWYnyzc6gbUJyM4T908Oh8vwJld9GEiU": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "DailyDataArchiveLambdaFunction"
                 },
-                "CodeSha256": "OZrGaoIT6Gqhn0ajtQP3LYxr/End+/XbD1Ti0mLrn2Q=",
+                "CodeSha256": "tabMChAVgTHHPi0WQDAcTSaQ/1VaZPd0AbgcdjxpDeE=",
                 "Description": "Archive and aggregate yesterday's data to S3 and DynamoDB"
               }
             },
-            "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw": {
+            "GraphqlLambdaVersionQjDIi3YVTJmn3sHrg7VqX2bFUS0tQbsYXigm57ecalY": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "GraphqlLambdaFunction"
                 },
-                "CodeSha256": "Jwgo8UoHQAqiphJNgfyuWwT0LxQL9G+132tu81bVgQE=",
+                "CodeSha256": "G/qiunfNjjEZ/ZOWQ242T/zJkoQlGAMWHIxsUx3mT1g=",
                 "Description": "GraphQL endpoint to query readings from devices"
               }
             },
@@ -461,7 +461,7 @@
                 "GraphqlLambdaPermissionApiGateway"
               ]
             },
-            "ApiGatewayDeployment1754200640834": {
+            "ApiGatewayDeployment1754232099184": {
               "Type": "AWS::ApiGateway::Deployment",
               "Properties": {
                 "RestApiId": {
@@ -689,7 +689,7 @@
             "DailyDataArchiveLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI"
+                "Ref": "DailyDataArchiveLambdaVersionLG17xB53ssZjWYnyzc6gbUJyM4T908Oh8vwJld9GEiU"
               },
               "Export": {
                 "Name": "sls-smart-home-energy-monitor-prod-DailyDataArchiveLambdaFunctionQualifiedArn"
@@ -698,7 +698,7 @@
             "GraphqlLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw"
+                "Ref": "GraphqlLambdaVersionQjDIi3YVTJmn3sHrg7VqX2bFUS0tQbsYXigm57ecalY"
               },
               "Export": {
                 "Name": "sls-smart-home-energy-monitor-prod-GraphqlLambdaFunctionQualifiedArn"
@@ -775,7 +775,7 @@
           "memory": 256,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI"
+          "versionLogicalId": "DailyDataArchiveLambdaVersionLG17xB53ssZjWYnyzc6gbUJyM4T908Oh8vwJld9GEiU"
         },
         "graphql": {
           "description": "GraphQL endpoint to query readings from devices",
@@ -815,7 +815,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw"
+          "versionLogicalId": "GraphqlLambdaVersionQjDIi3YVTJmn3sHrg7VqX2bFUS0tQbsYXigm57ecalY"
         }
       },
       "resources": {
@@ -1219,7 +1219,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
-                "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/dailyDataArchive.zip"
+                "S3Key": "serverless/smart-home-energy-monitor/prod/1754232156649-2025-08-03T14:42:36.649Z/dailyDataArchive.zip"
               },
               "Handler": "functions/cron-rotate-daily.handler",
               "Runtime": "nodejs18.x",
@@ -1254,7 +1254,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
-                "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/graphql.zip"
+                "S3Key": "serverless/smart-home-energy-monitor/prod/1754232156649-2025-08-03T14:42:36.649Z/graphql.zip"
               },
               "Handler": "functions/graphql/graphql.handler",
               "Runtime": "nodejs18.x",
@@ -1284,25 +1284,25 @@
               "GraphqlLogGroup"
             ]
           },
-          "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI": {
+          "DailyDataArchiveLambdaVersionLG17xB53ssZjWYnyzc6gbUJyM4T908Oh8vwJld9GEiU": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "DailyDataArchiveLambdaFunction"
               },
-              "CodeSha256": "OZrGaoIT6Gqhn0ajtQP3LYxr/End+/XbD1Ti0mLrn2Q=",
+              "CodeSha256": "tabMChAVgTHHPi0WQDAcTSaQ/1VaZPd0AbgcdjxpDeE=",
               "Description": "Archive and aggregate yesterday's data to S3 and DynamoDB"
             }
           },
-          "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw": {
+          "GraphqlLambdaVersionQjDIi3YVTJmn3sHrg7VqX2bFUS0tQbsYXigm57ecalY": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GraphqlLambdaFunction"
               },
-              "CodeSha256": "Jwgo8UoHQAqiphJNgfyuWwT0LxQL9G+132tu81bVgQE=",
+              "CodeSha256": "G/qiunfNjjEZ/ZOWQ242T/zJkoQlGAMWHIxsUx3mT1g=",
               "Description": "GraphQL endpoint to query readings from devices"
             }
           },
@@ -1463,7 +1463,7 @@
               "GraphqlLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1754200640834": {
+          "ApiGatewayDeployment1754232099184": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -1691,7 +1691,7 @@
           "DailyDataArchiveLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI"
+              "Ref": "DailyDataArchiveLambdaVersionLG17xB53ssZjWYnyzc6gbUJyM4T908Oh8vwJld9GEiU"
             },
             "Export": {
               "Name": "sls-smart-home-energy-monitor-prod-DailyDataArchiveLambdaFunctionQualifiedArn"
@@ -1700,7 +1700,7 @@
           "GraphqlLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw"
+              "Ref": "GraphqlLambdaVersionQjDIi3YVTJmn3sHrg7VqX2bFUS0tQbsYXigm57ecalY"
             },
             "Export": {
               "Name": "sls-smart-home-energy-monitor-prod-GraphqlLambdaFunctionQualifiedArn"
@@ -1750,26 +1750,26 @@
       "deploy"
     ],
     "options": {},
-    "orgId": "dc1b4e57-618d-4039-86e2-e373e12d36bc",
-    "orgName": "apivit",
-    "userId": "gzs09bz5zZsTk3lWhp",
-    "userName": "apivit",
+    "orgId": "15e4fc19-6221-4f3b-8365-495b394bdfc0",
+    "orgName": "rapeepon",
+    "userId": "lfjC0lLVXztgXY15tY",
+    "userName": "rapeepon",
     "serviceProviderAwsAccountId": "186582695969",
     "serviceProviderAwsCfStackName": "smart-home-energy-monitor-prod",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:ap-southeast-2:186582695969:stack/smart-home-energy-monitor-prod/a15a9a30-6f7d-11f0-bb58-020866352359",
     "serviceProviderAwsCfStackCreated": "2025-08-02T08:49:42.518Z",
-    "serviceProviderAwsCfStackUpdated": "2025-08-03T05:31:30.555Z",
+    "serviceProviderAwsCfStackUpdated": "2025-08-03T11:18:57.355Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
         "OutputKey": "DailyDataArchiveLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:ap-southeast-2:186582695969:function:smart-home-energy-monitor-prod-dailyDataArchive:15",
+        "OutputValue": "arn:aws:lambda:ap-southeast-2:186582695969:function:smart-home-energy-monitor-prod-dailyDataArchive:19",
         "Description": "Current Lambda function version",
         "ExportName": "sls-smart-home-energy-monitor-prod-DailyDataArchiveLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "GraphqlLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:ap-southeast-2:186582695969:function:smart-home-energy-monitor-prod-graphql:24",
+        "OutputValue": "arn:aws:lambda:ap-southeast-2:186582695969:function:smart-home-energy-monitor-prod-graphql:29",
         "Description": "Current Lambda function version",
         "ExportName": "sls-smart-home-energy-monitor-prod-GraphqlLambdaFunctionQualifiedArn"
       },
@@ -1928,7 +1928,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
-              "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/dailyDataArchive.zip"
+              "S3Key": "serverless/smart-home-energy-monitor/prod/1754232156649-2025-08-03T14:42:36.649Z/dailyDataArchive.zip"
             },
             "Handler": "functions/cron-rotate-daily.handler",
             "Runtime": "nodejs18.x",
@@ -1963,7 +1963,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
-              "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/graphql.zip"
+              "S3Key": "serverless/smart-home-energy-monitor/prod/1754232156649-2025-08-03T14:42:36.649Z/graphql.zip"
             },
             "Handler": "functions/graphql/graphql.handler",
             "Runtime": "nodejs18.x",
@@ -1993,25 +1993,25 @@
             "GraphqlLogGroup"
           ]
         },
-        "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI": {
+        "DailyDataArchiveLambdaVersionLG17xB53ssZjWYnyzc6gbUJyM4T908Oh8vwJld9GEiU": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "DailyDataArchiveLambdaFunction"
             },
-            "CodeSha256": "OZrGaoIT6Gqhn0ajtQP3LYxr/End+/XbD1Ti0mLrn2Q=",
+            "CodeSha256": "tabMChAVgTHHPi0WQDAcTSaQ/1VaZPd0AbgcdjxpDeE=",
             "Description": "Archive and aggregate yesterday's data to S3 and DynamoDB"
           }
         },
-        "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw": {
+        "GraphqlLambdaVersionQjDIi3YVTJmn3sHrg7VqX2bFUS0tQbsYXigm57ecalY": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "GraphqlLambdaFunction"
             },
-            "CodeSha256": "Jwgo8UoHQAqiphJNgfyuWwT0LxQL9G+132tu81bVgQE=",
+            "CodeSha256": "G/qiunfNjjEZ/ZOWQ242T/zJkoQlGAMWHIxsUx3mT1g=",
             "Description": "GraphQL endpoint to query readings from devices"
           }
         },
@@ -2172,7 +2172,7 @@
             "GraphqlLambdaPermissionApiGateway"
           ]
         },
-        "ApiGatewayDeployment1754200640834": {
+        "ApiGatewayDeployment1754232099184": {
           "Type": "AWS::ApiGateway::Deployment",
           "Properties": {
             "RestApiId": {
@@ -2400,7 +2400,7 @@
         "DailyDataArchiveLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI"
+            "Ref": "DailyDataArchiveLambdaVersionLG17xB53ssZjWYnyzc6gbUJyM4T908Oh8vwJld9GEiU"
           },
           "Export": {
             "Name": "sls-smart-home-energy-monitor-prod-DailyDataArchiveLambdaFunctionQualifiedArn"
@@ -2409,7 +2409,7 @@
         "GraphqlLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw"
+            "Ref": "GraphqlLambdaVersionQjDIi3YVTJmn3sHrg7VqX2bFUS0tQbsYXigm57ecalY"
           },
           "Export": {
             "Name": "sls-smart-home-energy-monitor-prod-GraphqlLambdaFunctionQualifiedArn"

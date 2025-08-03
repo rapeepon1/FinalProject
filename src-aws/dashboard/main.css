@@ -1,25 +1,38 @@
-.dygraph-legend{
-/*	left: 60px !important;
-	right: 0px;
-	top: -17px !important;
-	width: 100%;*/
+.circle {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 100%;
+  background: linear-gradient(145deg, #4da6ff, #1a75ff);
+  color: white;
+  font-weight: bold;
+  font-size: 1.2em;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  margin: 0 5px 10px 5px;
 }
 
-.circle{
-	display:block;
-	background-color: #1D294E;
-	color: #fff;
-	width: 120px;
-	height: 120px;
-
-	justify-content: center;
-	align-items: center;
-	border-radius: 100%;
-	text-align: center;
-	display: inline-flex;
+.circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
-.circle.big{
-	/*width: 200px;*/
-	/*height:200px;*/
+.circle.big {
+  width: 180px;
+  height: 180px;
+  font-size: 1.5em;
+}
+
+.card-body.scroll-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 320px; /* ปรับความสูงตามต้องการ */
+}
+
+#graphdiv {
+  min-width: 1500px;
+  height: 300px;
+  /* ให้ Dygraph ขยายตามขนาดข้อมูล */
 }
