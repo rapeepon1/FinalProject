@@ -1,0 +1,1003 @@
+{
+  "service": {
+    "service": "smart-home-energy-monitor",
+    "serviceObject": {
+      "name": "smart-home-energy-monitor"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "stage": "prod",
+      "region": "ap-southeast-2",
+      "profile": "serverless-personal",
+      "memorySize": 256,
+      "environment": {
+        "TZ": "Asia/Bangkok",
+        "DYNAMO_DB_TABLE": {
+          "Ref": "dynamoDataStore"
+        },
+        "S3_STORAGE_BUCKET": {
+          "Ref": "datastoreReadings"
+        }
+      },
+      "apiGateway": {
+        "minimumCompressionSize": 1024
+      },
+      "stackTags": {
+        "client": "xd-home-energy-monitor"
+      },
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:Query",
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:DeleteItem"
+          ],
+          "Resource": {
+            "Fn::GetAtt": [
+              "dynamoDataStore",
+              "Arn"
+            ]
+          }
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetObject",
+            "s3:PutObject"
+          ],
+          "Resource": [
+            {
+              "Fn::GetAtt": [
+                "datastoreReadings",
+                "Arn"
+              ]
+            },
+            {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::GetAtt": [
+                      "datastoreReadings",
+                      "Arn"
+                    ]
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "Monitoring home energy usage over time",
+        "Resources": {
+          "DailyDataArchiveLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/smart-home-energy-monitor-prod-dailyDataArchive"
+            }
+          },
+          "GraphqlLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/smart-home-energy-monitor-prod-graphql"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "smart-home-energy-monitor",
+                        "prod",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/smart-home-energy-monitor-prod*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/smart-home-energy-monitor-prod*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][1]"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "smart-home-energy-monitor",
+                    "prod",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "DailyDataArchiveLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
+                "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/dailyDataArchive.zip"
+              },
+              "Handler": "functions/cron-rotate-daily.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "smart-home-energy-monitor-prod-dailyDataArchive",
+              "MemorySize": 256,
+              "Timeout": 30,
+              "Description": "Archive and aggregate yesterday's data to S3 and DynamoDB",
+              "Environment": {
+                "Variables": {
+                  "TZ": "Asia/Bangkok",
+                  "DYNAMO_DB_TABLE": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"DYNAMO_DB_TABLE\"]"
+                  },
+                  "S3_STORAGE_BUCKET": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"S3_STORAGE_BUCKET\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "DailyDataArchiveLogGroup"
+            ]
+          },
+          "GraphqlLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
+                "S3Key": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z/graphql.zip"
+              },
+              "Handler": "functions/graphql/graphql.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "smart-home-energy-monitor-prod-graphql",
+              "MemorySize": 512,
+              "Timeout": 6,
+              "Description": "GraphQL endpoint to query readings from devices",
+              "Environment": {
+                "Variables": {
+                  "TZ": "Asia/Bangkok",
+                  "DYNAMO_DB_TABLE": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"DYNAMO_DB_TABLE\"]"
+                  },
+                  "S3_STORAGE_BUCKET": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"S3_STORAGE_BUCKET\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GraphqlLogGroup"
+            ]
+          },
+          "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "DailyDataArchiveLambdaFunction"
+              },
+              "CodeSha256": "OZrGaoIT6Gqhn0ajtQP3LYxr/End+/XbD1Ti0mLrn2Q=",
+              "Description": "Archive and aggregate yesterday's data to S3 and DynamoDB"
+            }
+          },
+          "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GraphqlLambdaFunction"
+              },
+              "CodeSha256": "Jwgo8UoHQAqiphJNgfyuWwT0LxQL9G+132tu81bVgQE=",
+              "Description": "GraphQL endpoint to query readings from devices"
+            }
+          },
+          "DailyDataArchiveEventsRuleSchedule1": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+              "ScheduleExpression": "cron(0 19 * * ? *)",
+              "State": "ENABLED",
+              "Description": "Archive the data generated yesterday to S3",
+              "Targets": [
+                {
+                  "Arn": {
+                    "Fn::GetAtt": [
+                      "DailyDataArchiveLambdaFunction",
+                      "Arn"
+                    ]
+                  },
+                  "Id": "dailyDataArchiveSchedule"
+                }
+              ]
+            }
+          },
+          "DailyDataArchiveLambdaPermissionEventsRuleSchedule1": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "DailyDataArchiveLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "events.amazonaws.com",
+              "SourceArn": {
+                "Fn::GetAtt": [
+                  "DailyDataArchiveEventsRuleSchedule1",
+                  "Arn"
+                ]
+              }
+            }
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "prod-smart-home-energy-monitor",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              },
+              "Policy": "",
+              "MinimumCompressionSize": 1024
+            }
+          },
+          "ApiGatewayResourceGraphql": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "graphql",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodGraphqlOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceGraphql"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodGraphqlPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceGraphql"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GraphqlLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GraphqlLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1754200640834": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "prod"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodGraphqlOptions",
+              "ApiGatewayMethodGraphqlPost"
+            ]
+          },
+          "GraphqlLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GraphqlLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "datastoreReadings": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "smart-home-energy-monitor-dev-ap-southeast-2-readings"
+            }
+          },
+          "wwwBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "smart-home-energy-monitor-www"
+            }
+          },
+          "dynamoDataStore": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "smart-home-energy-monitor",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "primarykey",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "sortkey",
+                  "AttributeType": "N"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "primarykey",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "sortkey",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TimeToLiveSpecification": {
+                "AttributeName": "ttl",
+                "Enabled": true
+              }
+            }
+          },
+          "iotRule": {
+            "Type": "AWS::IoT::TopicRule",
+            "Properties": {
+              "TopicRulePayload": {
+                "Actions": [
+                  {
+                    "DynamoDBv2": {
+                      "PutItem": {
+                        "TableName": "smart-home-energy-monitor"
+                      },
+                      "RoleArn": {
+                        "Fn::GetAtt": [
+                          "iotRuleAllowDynamoWrites",
+                          "Arn"
+                        ]
+                      }
+                    }
+                  }
+                ],
+                "AwsIotSqlVersion": "2016-03-23",
+                "Description": "Forwards incoming sensor messages to DynamoDB for analysis",
+                "RuleDisabled": false,
+                "Sql": "SELECT * ,\n      'reading-' + clientid() as primarykey,\n      (timestamp() / 1000) as sortkey,\n      ((timestamp() / 1000) + 2592000) as ttl FROM 'esp32/data'"
+              }
+            }
+          },
+          "iotPolicyForDevices": {
+            "Type": "AWS::IoT::Policy",
+            "Properties": {
+              "PolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "iot:Connect"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                      "Bool": {
+                        "iot:Connection.Thing.IsAttached": [
+                          true
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "iot:Publish"
+                    ],
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:aws:iot:",
+                            {
+                              "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                              "Ref": "AWS::AccountId"
+                            },
+                            ":topic/$aws/rules/",
+                            {
+                              "Ref": "iotRule"
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          "iotRuleAllowDynamoWrites": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "iot.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Path": "/",
+              "Policies": [
+                {
+                  "PolicyName": "smart-home-energy-monitor-firehose-role",
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "dynamodb:PutItem"
+                        ],
+                        "Resource": {
+                          "Fn::GetAtt": [
+                            "dynamoDataStore",
+                            "Arn"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-ap-southeast-2-71442201-972f",
+            "Export": {
+              "Name": "sls-smart-home-energy-monitor-prod-ServerlessDeploymentBucketName"
+            }
+          },
+          "DailyDataArchiveLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI"
+            },
+            "Export": {
+              "Name": "sls-smart-home-energy-monitor-prod-DailyDataArchiveLambdaFunctionQualifiedArn"
+            }
+          },
+          "GraphqlLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw"
+            },
+            "Export": {
+              "Name": "sls-smart-home-energy-monitor-prod-GraphqlLambdaFunctionQualifiedArn"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/prod"
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-smart-home-energy-monitor-prod-ServiceEndpoint"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "scriptHooks": {
+        "before:deploy:createDeploymentArtifacts": "npm run test"
+      },
+      "client": {
+        "bucketName": "smart-home-energy-monitor-www",
+        "distributionFolder": "dashboard/",
+        "indexDocument": "index.html"
+      },
+      "webpack": {
+        "webpackConfig": "webpack.config.js",
+        "includeModules": true,
+        "packager": "npm"
+      }
+    },
+    "plugins": [
+      "serverless-webpack",
+      "serverless-finch",
+      "serverless-scriptable-plugin",
+      "serverless-esbuild"
+    ],
+    "pluginsData": {},
+    "functions": {
+      "dailyDataArchive": {
+        "handler": "functions/cron-rotate-daily.handler",
+        "description": "Archive and aggregate yesterday's data to S3 and DynamoDB",
+        "timeout": 30,
+        "events": [
+          {
+            "schedule": {
+              "description": "Archive the data generated yesterday to S3",
+              "rate": [
+                "cron(0 19 * * ? *)"
+              ]
+            }
+          }
+        ],
+        "name": "smart-home-energy-monitor-prod-dailyDataArchive",
+        "package": {
+          "artifact": ".serverless\\dailyDataArchive.zip"
+        },
+        "memory": 256,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "DailyDataArchiveLambdaVersionprGK6ebnqKDPoSXLU7xOFYvbP59tEidu9YGAzmfI"
+      },
+      "graphql": {
+        "description": "GraphQL endpoint to query readings from devices",
+        "handler": "functions/graphql/graphql.handler",
+        "memorySize": 512,
+        "package": {
+          "artifact": ".serverless\\graphql.zip"
+        },
+        "events": [
+          {
+            "http": {
+              "path": "graphql",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "smart-home-energy-monitor-prod-graphql",
+        "memory": 512,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "GraphqlLambdaVersionp7clZH3CAPz7qpJZSGQ8IaNMvlmIEovi4lVQYDJcw"
+      }
+    },
+    "resources": {
+      "Description": "Monitoring home energy usage over time",
+      "Resources": {
+        "datastoreReadings": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "smart-home-energy-monitor-dev-ap-southeast-2-readings"
+          }
+        },
+        "wwwBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "smart-home-energy-monitor-www"
+          }
+        },
+        "dynamoDataStore": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "smart-home-energy-monitor",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "primarykey",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "sortkey",
+                "AttributeType": "N"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "primarykey",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "sortkey",
+                "KeyType": "RANGE"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            },
+            "TimeToLiveSpecification": {
+              "AttributeName": "ttl",
+              "Enabled": true
+            }
+          }
+        },
+        "iotRule": {
+          "Type": "AWS::IoT::TopicRule",
+          "Properties": {
+            "TopicRulePayload": {
+              "Actions": [
+                {
+                  "DynamoDBv2": {
+                    "PutItem": {
+                      "TableName": "smart-home-energy-monitor"
+                    },
+                    "RoleArn": {
+                      "Fn::GetAtt": [
+                        "iotRuleAllowDynamoWrites",
+                        "Arn"
+                      ]
+                    }
+                  }
+                }
+              ],
+              "AwsIotSqlVersion": "2016-03-23",
+              "Description": "Forwards incoming sensor messages to DynamoDB for analysis",
+              "RuleDisabled": false,
+              "Sql": "SELECT * ,\n      'reading-' + clientid() as primarykey,\n      (timestamp() / 1000) as sortkey,\n      ((timestamp() / 1000) + 2592000) as ttl FROM 'esp32/data'"
+            }
+          }
+        },
+        "iotPolicyForDevices": {
+          "Type": "AWS::IoT::Policy",
+          "Properties": {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iot:Connect"
+                  ],
+                  "Resource": "*",
+                  "Condition": {
+                    "Bool": {
+                      "iot:Connection.Thing.IsAttached": [
+                        true
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "iot:Publish"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:iot:",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ":",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":topic/$aws/rules/",
+                          {
+                            "Ref": "iotRule"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "iotRuleAllowDynamoWrites": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "iot.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Path": "/",
+            "Policies": [
+              {
+                "PolicyName": "smart-home-energy-monitor-firehose-role",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:PutItem"
+                      ],
+                      "Resource": {
+                        "Fn::GetAtt": [
+                          "dynamoDataStore",
+                          "Arn"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless",
+    "initialServerlessConfig": {
+      "service": "smart-home-energy-monitor",
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "build": {
+        "esbuild": false
+      },
+      "package": {
+        "individually": true,
+        "exclude": [
+          "functions/graphql/node_modules/**",
+          "dashboard/**",
+          "tests/**"
+        ],
+        "artifactsS3KeyDirname": "serverless/smart-home-energy-monitor/prod/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-ap-southeast-2-71442201-972f"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      },
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      }
+    },
+    "appId": null,
+    "orgId": null,
+    "build": {
+      "$ref": "$[\"service\"][\"initialServerlessConfig\"][\"build\"]"
+    },
+    "layers": {}
+  },
+  "package": {
+    "individually": true,
+    "artifactDirectoryName": "serverless/smart-home-energy-monitor/prod/1754200671768-2025-08-03T05:57:51.768Z",
+    "artifact": ""
+  }
+}
